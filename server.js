@@ -8,7 +8,7 @@ const User = require('./models/User');
 const bcrypt = require('bcrypt');
 const cryptoRandomString = require('crypto-random-string');
 const jwt = require('jsonwebtoken');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -50,7 +50,7 @@ function generateAuthToken(user) {
     {
       _id: user._id,
     },
-    process.env.JWT_KEY
+    process.env.JWT_PRIVATE_KEY
   );
 }
 
@@ -164,6 +164,7 @@ app.delete('/expenses/:id', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
+  console.log(req.body);
   try {
     const { data } = await axios.post(
       `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.body.token.token}`
