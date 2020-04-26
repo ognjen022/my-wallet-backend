@@ -10,7 +10,7 @@ const cryptoRandomString = require('crypto-random-string');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: 'https://my-wallet-app.netlify.app/' }));
+app.use(cors({ origin: 'https://my-wallet-app.netlify.app' }));
 app.options('*', cors());
 app.use(express.json());
 
