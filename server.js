@@ -9,12 +9,8 @@ const bcrypt = require('bcrypt');
 const cryptoRandomString = require('crypto-random-string');
 const jwt = require('jsonwebtoken');
 
-app.use(
-  cors({
-    origin: 'https://my-wallet-app.netlify.app/',
-  })
-);
-app.options('*', cors());
+app.use(cors());
+// app.options('*', cors());
 app.use(express.json());
 
 mongoose
@@ -30,14 +26,14 @@ mongoose
   .then(() => console.log(`Database connected`))
   .catch((err) => console.log(`Database connection error: ${err.message}`));
 
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  );
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept'
+//   );
+//   next();
+// });
 
 async function registerUser(userData) {
   const user = new User({
