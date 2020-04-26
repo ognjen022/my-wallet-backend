@@ -1,29 +1,46 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const mongoose = require("mongoose");
-const cors = require("cors");
-const Expense = require("./models/Expense");
-const axios = require("axios");
-const User = require("./models/User");
-const bcrypt = require("bcrypt");
-const cryptoRandomString = require("crypto-random-string");
-const jwt = require("jsonwebtoken");
+const mongoose = require('mongoose');
+const cors = require('cors');
+const Expense = require('./models/Expense');
+const axios = require('axios');
+const User = require('./models/User');
+const bcrypt = require('bcrypt');
+const cryptoRandomString = require('crypto-random-string');
+const jwt = require('jsonwebtoken');
 
 app.use(cors());
 app.options('*', cors());
 app.use(express.json());
 
-mongoose.connect("mongodb+srv://ognjen022:cocacola123@cluster0-o2ghw.mongodb.net/expenses?retryWrites=true&w=majority",
-  { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose
+  .connect(
+    'mongodb+srv://ognjen022:cocacola123@cluster0-o2ghw.mongodb.net/expenses?retryWrites=true&w=majority',
+    {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    }
+  )
   .then(() => console.log(`Database connected`))
-  .catch(err => console.log(`Database connection error: ${err.message}`));
+  .catch((err) => console.log(`Database connection error: ${err.message}`));
+
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  next();
+});
 
 async function registerUser(userData) {
   const user = new User({
     email: userData.email,
     password: userData.password,
     socialId: userData.socialId || null,
-    socialType: userData.socialType || "local"
+    socialType: userData.socialType || 'local',
   });
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
@@ -32,11 +49,12 @@ async function registerUser(userData) {
 }
 
 function generateAuthToken(user) {
-  return jwt.sign({
-    _id: user._id,
-  },
-    "KITA"
-  )
+  return jwt.sign(
+    {
+      _id: user._id,
+    },
+    'KITA'
+  );
 }
 
 // app.get("/expenses", (req, res) => {
@@ -49,12 +67,12 @@ function generateAuthToken(user) {
 //   })
 // });
 
-app.get("/expenses/:id", async (req, res) => {
+app.get('/expenses/:id', async (req, res) => {
   await User.findById(req.params.id, async (err, user) => {
     if (err) {
       console.log(err);
     } else {
-      let allExpenses = []
+      let allExpenses = [];
       for (let i = 0; i < user.expenses.length; i++) {
         let expense = await Expense.findById(user.expenses[i]);
         if (expense !== null) {
@@ -64,7 +82,7 @@ app.get("/expenses/:id", async (req, res) => {
       res.status(200).json(allExpenses);
     }
   });
-})
+});
 
 // app.get("/expenses/:id", (req, res) => {
 //   Expense.findById(req.params.id, (err, foundExpense) => {
@@ -76,7 +94,7 @@ app.get("/expenses/:id", async (req, res) => {
 //   })
 // });
 
-app.post("/expenses/:id", async (req, res) => {
+app.post('/expenses/:id', async (req, res) => {
   await User.findById(req.params.id, async (err, user) => {
     if (err) {
       console.log(err);
@@ -92,7 +110,7 @@ app.post("/expenses/:id", async (req, res) => {
       });
     }
   });
-})
+});
 
 // app.post("/expenses", async (req, res) => {
 //   console.log(req.body)
@@ -110,46 +128,54 @@ app.post("/expenses/:id", async (req, res) => {
 //   }
 // })
 
-
-app.post("/expenses", async (req, res) => {
-  await Expense.create({ ...req.body, author: req.body.author }, (err, expense) => {
-    if (err) {
-      console.log(err);
-    } else {
-      user.expenses.push(expense);
-      user.save();
+app.post('/expenses', async (req, res) => {
+  await Expense.create(
+    { ...req.body, author: req.body.author },
+    (err, expense) => {
+      if (err) {
+        console.log(err);
+      } else {
+        user.expenses.push(expense);
+        user.save();
+      }
     }
-  });
-})
-
-app.put("/expenses/:id", async (req, res) => {
-  let updatedExpense = {
-    name: req.body.name,
-    amount: req.body.amount
-  };
-  const updatedExpenseRes = await Expense.findOneAndUpdate({ _id: req.params.id }, updatedExpense, { returnNewDocument: true })
-  res.send("OK")
+  );
 });
 
-app.delete("/expenses/:id", async (req, res) => {
-  console.log(req.params.id)
+app.put('/expenses/:id', async (req, res) => {
+  let updatedExpense = {
+    name: req.body.name,
+    amount: req.body.amount,
+  };
+  const updatedExpenseRes = await Expense.findOneAndUpdate(
+    { _id: req.params.id },
+    updatedExpense,
+    { returnNewDocument: true }
+  );
+  res.send('OK');
+});
+
+app.delete('/expenses/:id', async (req, res) => {
+  console.log(req.params.id);
   try {
     const delExpense = await Expense.findByIdAndDelete(req.params.id);
-    res.send("OK")
+    res.send('OK');
   } catch (e) {
     res.status(400).send(e.message);
-    console.log(e)
+    console.log(e);
   }
-})
+});
 
-app.post("/login", async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
-    const { data } = await axios.post(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.body.token.token}`);
+    const { data } = await axios.post(
+      `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.body.token.token}`
+    );
     let user = await User.findOne({ socialId: data.user_id });
     if (user === null) {
       const generatedPassword = cryptoRandomString({
         length: 256,
-        type: "base64"
+        type: 'base64',
       });
       const userData = {
         email: data.email,
@@ -164,7 +190,6 @@ app.post("/login", async (req, res) => {
   } catch (err) {
     res.status(400).send({ message: err.message });
   }
+});
 
-})
-
-app.listen(5000, () => console.log("Server listening for requests."))
+app.listen(5000, () => console.log('Server listening for requests.'));
