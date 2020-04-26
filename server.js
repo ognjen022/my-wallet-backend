@@ -8,6 +8,7 @@ const User = require('./models/User');
 const bcrypt = require('bcrypt');
 const cryptoRandomString = require('crypto-random-string');
 const jwt = require('jsonwebtoken');
+const port = process.env.PORT || 3000;
 
 app.use(cors({ origin: 'https://my-wallet-app.netlify.app/' }));
 app.options('*', cors());
@@ -210,4 +211,4 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log('Server listening for requests.'));
+app.listen(port, () => console.log('Server listening for requests.'));
