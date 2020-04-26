@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -50,7 +51,7 @@ function generateAuthToken(user) {
     {
       _id: user._id,
     },
-    process.env.JWT_PRIVATE_KEY
+    'KITA'
   );
 }
 
