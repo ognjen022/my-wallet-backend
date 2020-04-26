@@ -9,7 +9,11 @@ const bcrypt = require('bcrypt');
 const cryptoRandomString = require('crypto-random-string');
 const jwt = require('jsonwebtoken');
 
-app.use(cors());
+app.use(
+  cors({
+    origin: 'https://my-wallet-app.netlify.app/',
+  })
+);
 app.options('*', cors());
 app.use(express.json());
 
