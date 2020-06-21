@@ -55,16 +55,30 @@ exports.createExpense = async (req, res) => {
 // @route   PUT /expenses/:id
 // @acess   Private
 exports.editExpense = async (req, res) => {
+  const expense = await Expense.findById(req.params.id);
+
+  if (!expense) {
+    return res
+      .status(404)
+      .json({ message: "Couldn't find expense with that id" });
+  }
+
+  if (expense.author.toString() !== req.user) {
+    return res
+      .status(401)
+      .json({ message: 'You are not authorized to update this expense' });
+  }
+
   let updatedExpense = {
     name: req.body.name,
     amount: req.body.amount,
   };
-  const updatedExpenseRes = await Expense.findOneAndUpdate(
-    { _id: req.params.id },
-    updatedExpense,
-    { returnNewDocument: true }
-  );
-  res.send('OK');
+
+  await Expense.findOneAndUpdate({ _id: req.params.id }, updatedExpense, {
+    returnNewDocument: true,
+  });
+
+  res.status(200).json({ message: 'Updated expense successfully' });
 };
 
 // @desc    Delete an expense
@@ -72,8 +86,23 @@ exports.editExpense = async (req, res) => {
 // @acess   Private
 exports.deleteExpense = async (req, res) => {
   try {
-    const delExpense = await Expense.findByIdAndDelete(req.params.id);
-    res.send('OK');
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res
+        .status(404)
+        .json({ message: "Couldn't find expense with that id" });
+    }
+
+    if (expense.author.toString() !== req.user) {
+      return res
+        .status(401)
+        .json({ message: 'You are not authorized to delete this expense' });
+    }
+
+    await expense.remove();
+
+    res.status(200).json({ message: 'Deleted expense successfully' });
   } catch (e) {
     res.status(400).send(e.message);
     console.log(e);
