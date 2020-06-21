@@ -12,14 +12,9 @@ exports.getExpenses = async (req, res) => {
     return res.status(404).json({ msg: 'User not found' });
   }
 
-  let allExpenses = [];
-  for (let i = 0; i < user.expenses.length; i++) {
-    let expense = await Expense.findById(user.expenses[i]);
-    if (expense !== null) {
-      allExpenses.push(expense);
-    }
-  }
-  res.status(200).json(allExpenses);
+  const expenses = await Expense.find({ author: req.user });
+
+  res.status(200).json(expenses);
 };
 
 // @desc    Add new expense
